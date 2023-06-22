@@ -231,7 +231,3 @@ yhat.boost=predict(boost.incomedata_procesado,newdata=incomedata_procesado[-trai
 mean((yhat.boost-incomedata_procesado[-train,]$income)^2) #El ECM no mejora sustancialmente.
 #Se podría hacer cross-validation para la obtención del mejor hiperparámetro que minimice el ECM
 
-
-#El modelo con menor ECM y con mayor porcentaje de variabilidad explicada es el primero, 
-#correspondiente al árbol único de regresión podado de forma óptima. 
-#Por tanto, nos quedamos con las predicciones que arroja el primer modelo para nuestro conjunto de datos.
