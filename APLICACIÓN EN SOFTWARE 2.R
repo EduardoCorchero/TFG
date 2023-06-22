@@ -27,8 +27,9 @@ hist(y,prob=TRUE,breaks=20,main="",xlab="log-rentanorm",ylab="",xlim=c(8,12))
 x<-seq(from=8,to=12,by=0.1)
 lines(x,dnorm(x,mean(log(rentanormt)),sqrt(var(log(rentanormt)))))
 
-# El logaritmo de rentanorm tiene distribuciónn aproximadamente normal, 
-# por lo que usaremos la variable de la renta transformada 'y'.
+# El logaritmo de rentanorm tiene distribución aproximadamente normal, 
+# por lo que usaremos la variable de la renta transformada 'y' 
+# para estudiar las variables significativas para la estimación de la pobreza.
 
 
 ##############################################################################
@@ -284,7 +285,7 @@ anova(lm(y~as.factor(situa)))
 #CONSTRUCCIÓN DEL ÁRBOL DE DECISIÓN
 ########################################
 
-# Ajustamos un árbol de decisión para la variables rentanorm 
+#Ajustamos un árbol de decisión para la variable sin transformar rentanorm
 # con las variables explicativas significativas:
 # (a) edad2, edad3, edad4 y edad5: quitamos edad1 (referencia) para que no haya colinearidad
 # (b) nacio1: Quitamos nacio2 (referencia)
@@ -307,6 +308,8 @@ for(d in 1:18){
   renta_media <- c(renta_media,renta_media_d)
 }
 renta_media
+#10426.683 13436.725 13153.491 14637.613 11500.209 13109.937 11643.123 10858.060 14537.626 12280.159
+#9897.327 11534.033 14989.200 10842.673 16040.429 15011.727 12182.581 11641.662
 
 #Calculamos ahora la incidencia de pobreza poblacional real en cada comunidad.
 #El umbral de pobreza se ha calculado de antemano como el 60% de la mediana de los ingresos, 
@@ -317,6 +320,10 @@ for(d in 1:18){
   incidencia_pobreza <- c(incidencia_pobreza,incidencia_pobreza_d)
 }
 incidencia_pobreza
+#0.2983943 0.1310712 0.1214197 0.1245075 0.2627566 0.1211073 0.2394488 0.2949886 0.1193866 0.1608315
+#0.3541935 0.2240964 0.1259926 0.2734463 0.1161348 0.1050885 0.2227674 0.3546441
+
+plot(x = incidencia_pobreza)
 
 #Primero vemos el tamaño poblacional de cada comunidad autónoma:
 frec_ccaa <- as.data.frame(table(ccaa))
@@ -364,6 +371,35 @@ muestra <- muest[,c('ccaa','edad2','edad3','edad4','edad5','edu1','edu3','nacio1
 #observaciones fuera de la muestra solo con las variables del modelo, sin la variable dependiente 'y'
 fuera_muestra <- fuera_muest[,c('ccaa','edad2','edad3','edad4','edad5','edu1','edu3','nacio1','situ1','situ2')]
 
+#En primer lugar, consideramos las variables categóricas como factores:
+# muestra$ccaa <- factor(muestra$ccaa)
+# muestra$edad2 <- factor(muestra$edad2)
+# muestra$edad3 <- factor(muestra$edad3)
+# muestra$edad4 <- factor(muestra$edad4)
+# muestra$edad5 <- factor(muestra$edad5)
+# muestra$edu1 <- factor(muestra$edu1)
+# muestra$edu3 <- factor(muestra$edu3)
+# muestra$nacio1 <- factor(muestra$nacio1)
+# muestra$situ1 <- factor(muestra$situ1)
+# muestra$situ2 <- factor(muestra$situ2)
+# head(muestra)
+# summary(muestra)
+# 
+# fuera_muestra$ccaa <- factor(fuera_muestra$ccaa)
+# fuera_muestra$edad2 <- factor(fuera_muestra$edad2)
+# fuera_muestra$edad3 <- factor(fuera_muestra$edad3)
+# fuera_muestra$edad4 <- factor(fuera_muestra$edad4)
+# fuera_muestra$edad5 <- factor(fuera_muestra$edad5)
+# fuera_muestra$edu1 <- factor(fuera_muestra$edu1)
+# fuera_muestra$edu3 <- factor(fuera_muestra$edu3)
+# fuera_muestra$nacio1 <- factor(fuera_muestra$nacio1)
+# fuera_muestra$situ1 <- factor(fuera_muestra$situ1)
+# fuera_muestra$situ2 <- factor(fuera_muestra$situ2)
+# head(fuera_muestra)
+# summary(fuera_muestra)
+
+#Construimos el árbol:
+
 #Importamos las librerías necesarias.
 library(ISLR)
 library(MASS)
@@ -399,16 +435,10 @@ text(prune.muestra,pretty=0)
 tree.muestra <- prune.muestra
 summary(tree.muestra) 
 
-SCT <- var(muestra$rentanorm) #Suma de Cuadrado Total(SCT)
-mediahat <- predict(tree.muestra, newdata = muestra)
-SCE <- mean((mediahat - mean(mediahat))^2) #SCE
-SCR <- SCT-SCE #Suma de cuadrados debido al modelo
-R <- SCR/SCT
-R #El porcentaje de variabilidad explicada por el modelo es del 84,49%, por lo que el modelo se puede considerar bueno para predecir.
 
-
-#Ahora vamos a estimar la media de la renta y la incidencia de pobreza en cada comunidad autónoma, 
-#así como el ECM y el sesgo de cada estimador, a través de la simulación de 200 submuestras de test.
+#Ahora vamos a estimar la media de la renta y la incidencia de pobreza en cada comunidad autónoma 
+#utilizando el árbol anterior, así como el ECM y el sesgo de cada estimador, 
+#a través de la simulación de 200 submuestras de test.
 
 est_media_s <- c()
 est_inc_s <- c()
@@ -457,6 +487,7 @@ for (d in 1:18){
   est_inc_ccaa_d <- sum(est_inc_s[seq(d,length(est_inc_s),12)])/200
   est_inc_ccaa <- c(est_inc_ccaa, est_inc_ccaa_d)
 }
+est_inc_ccaa #estimador de la simulación de la incidencia de pobreza por ccaa
 #0.14736237 0.18630383 0.08914835 0.10113979 0.23395945 0.18450635 0.14736237 0.18630383 0.08914835
 #0.10113979 0.23395945 0.18450635 0.14671505 0.18597488 0.08864835 0.10074917 0.23314550 0.18393817est_inc_ccaa #estimador de la simulación de la incidencia de pobreza por ccaa
 
