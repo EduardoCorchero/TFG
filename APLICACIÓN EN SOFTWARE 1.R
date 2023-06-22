@@ -9,12 +9,32 @@ head(data)
 
 #Primero voy a realizar el preprocesamiento de los datos en Jupyter.
 #Para ello voy a exportar el dataframe incomedata:
-write.csv(incomedata, "incomedata.csv") #punto y coma como separador y coma como separador decimal.
+#write.csv(incomedata, "incomedata.csv") #punto y coma como separador y coma como separador decimal.
 
-#PREPROCESAMIENTO Y ANÁLISIS EXPLORATORIO HECHO EN JUPYTER, ANEXO.
+#PREPROCESAMIENTO Y ANÁLISIS EXPLORATORIO HECHO EN JUPYTER, ANEXO, APLICACIÓN EN SOFTWARE 1.PREPROCESING.ipynb.
 
 #Ya tengo el dataframe preprocesado: 'incomedata_procesado'
 attach(incomedata_procesado)
+head(incomedata_procesado)
+summary(incomedata_procesado)
+
+#Ahora voy a convertir las variables categóricas en factores y actualizar el conjunto de datos con los factores:
+provf <- factor(prov) #No lo voy a usar para construir el árbol, porque se produce el siguiente error:
+#Error in tree(income ~ ., data = incomedata_procesado_f.train) : 
+#factor predictors must have at most 32 levels
+acf <- factor(ac)
+genf <- factor(gen)
+natf <- factor(nat)
+laborf <- factor(labor)
+age2f <- factor(age2)
+age3f <- factor(age3)
+age4f <- factor(age4)
+age5f <- factor(age5)
+educ1f <- factor(educ1)
+educ2f <- factor(educ2)
+educ3f <- factor(educ3)
+
+incomedata_procesado <- data.frame(prov, acf, genf, natf, laborf, age2f, age3f, age4f, age5f, educ1f, educ2f, educ3f, income)
 head(incomedata_procesado)
 summary(incomedata_procesado)
 
@@ -37,14 +57,14 @@ incomedata_procesado.test <- incomedata_procesado[-train, ]
 # Graficamos el árbol e interpretamos resultados. 
 tree.incomedata_procesado <- tree(income ~ ., data = incomedata_procesado.train)
 summary(tree.incomedata_procesado) 
-#El árbol ajustado tiene cuatro nodos terminales,
+#El árbol ajustado tiene tres nodos terminales,
 #se han usado las variables relacionadas con la educación y la situación laboral, como ya preveíamos.
 #Nos sorprende que la variable provincia no aparezca en el árbol ya que observábamos cierta dependencia en los gráficos.
 plot(tree.incomedata_procesado)
 text(tree.incomedata_procesado, pretty = 0)
 #Veamos ahora el error cuadrático medio de test:
 yhat <- predict(tree.incomedata_procesado, newdata = incomedata_procesado.test)
-mean((yhat - incomedata_procesado.test$income)^2) #ECM de test = 44839735
+mean((yhat - incomedata_procesado.test$income)^2) #ECM de test =  44985824
 
 # c: Utilizamos la validación cruzada para determinar el nivel óptimo de árbol: complejidad. 
 cv.incomedata_procesado <- cv.tree(tree.incomedata_procesado)
@@ -55,14 +75,14 @@ plot(cv.incomedata_procesado$size, cv.incomedata_procesado$dev, type = "b")
 tree.min <- which.min(cv.incomedata_procesado$dev)
 tree.min
 points(cv.incomedata_procesado$size[tree.min], cv.incomedata_procesado$dev[tree.min], col = "red", cex = 2, pch = 20)
-#La poda del árbol no mejora la tasa de error de la prueba, nos quedamos con el árbol con 4 nodos terminales.
+#La poda del árbol no mejora la tasa de error de la prueba, nos quedamos con el árbol con 3 nodos terminales.
 
 SCT <- var(incomedata_procesado$income) #Suma de Cuadrado Total(SCT)
 yhat <- predict(tree.incomedata_procesado, newdata = incomedata_procesado)
 SCE <- mean((yhat - mean(yhat))^2) #SCE
 SCR <- SCT-SCE #Suma de cuadrados debido al modelo
 R <- SCR/SCT
-R #El porcentaje de variabilidad explicada por el modelo es del 87,72%, por lo que el modelo se puede considerar bueno para predecir.
+R #El porcentaje de variabilidad explicada por el modelo es del 88,53%, por lo que el modelo se puede considerar bueno para predecir.
 
 ###################################################
 #Ahora vamos a construir un ÁRBOL DE CLASIFICACIÓN:
@@ -78,7 +98,7 @@ summary(incomedata_procesado_cl) #vemos que hay 7233 personas en riesgo de pobre
 #Construimos el árbol y lo graficamos:
 tree.incomedata_procesado_cl=tree(rp~.-income,incomedata_procesado_cl)
 summary(tree.incomedata_procesado_cl)
-#En este caso el árbol ajustado tiene 3 nodos terminales, y ultiliza solo dos variables, los mismas dos primeras que en regresión
+#En este caso el árbol ajustado tiene 3 nodos terminales, y ultiliza solo dos variables, los mismas que en regresión.
 #El error de clasificación de entrenamiento  es del 39.62%, por lo que el modelo no es muy preciso
 plot(tree.incomedata_procesado_cl)
 text(tree.incomedata_procesado_cl,pretty=0)
@@ -127,14 +147,14 @@ yhat.bag <- predict(bag.incomedata_procesado,newdata=incomedata_procesado[-train
 SCE.bag <- mean((yhat.bag - mean(yhat.bag))^2) #SCE
 SCR.bag <- SCT-SCE.bag #Suma de cuadrados debido al modelo
 R.bag <- SCR.bag/SCT
-R.bag #El porcentaje de variabilidad explicada por el modelo es del 76,85%, por lo que el modelo se puede considerar bueno para predecir.
+R.bag #El porcentaje de variabilidad explicada por el modelo es del 73,11%, por lo que el modelo se puede considerar bueno para predecir.
 
 #Veamos ahora el error cuadrático de test:
 yhat.bag = predict(bag.incomedata_procesado,newdata=incomedata_procesado[-train,])
 plot(yhat.bag, incomedata_procesado[-train,]$income)
 abline(0,1)
 mean((yhat.bag-incomedata_procesado[-train,]$income)^2)
-#El ECM de test asociado al árbol de regresión de Bagging es de 50197864, 
+#El ECM de test asociado al árbol de regresión de Bagging es de 47502657, 
 #superando el obtenido utilizando un árbol único podado de forma óptima. 
 #En este sentido, el primer árbol de regresión es mejor que el del modelo Bagging.
 #Veamos ahora si el modelo mejora, si en vez de 500 árboles, utilizamos 1000 para su construcción.
@@ -150,16 +170,18 @@ mean((yhat.bag-incomedata_procesado[-train,]$income)^2) #El ECM de test no mejor
 
 #Para la construcción del modelo de Random Forest vamos a considerar 3 variables en cada partición (aproximación de la raíz de 12)
 rf.incomedata_procesado=randomForest(income~.,data=incomedata_procesado,subset=train,mtry=3,importance=TRUE)
+rf.incomedata_procesado
+
 yhat.rf = predict(rf.incomedata_procesado,newdata=incomedata_procesado[-train,])
 mean((yhat.rf-incomedata_procesado.test$income)^2)
-#El ECM de test (49175223) tampoco es mejor que el obtenido utilizando un árbol único podado de forma óptima
+#El ECM de test (43836636) es mejor que el obtenido utilizando un árbol único podado de forma óptima
 
 #Veamos cuál es el porcentaje de variabilidad explicada por el modelo:
 SCT <- var(incomedata_procesado$income) #Suma de Cuadrado Total(SCT)
 SCE.rf <- mean((yhat.rf - mean(yhat.rf))^2) #SCE
 SCR.rf <- SCT-SCE.rf #Suma de cuadrados debido al modelo
 R.rf <- SCR.rf/SCT
-R.rf #El porcentaje de variabilidad explicada por el modelo es del 85,58%, por lo que el modelo se puede considerar bueno para predecir.
+R.rf #El porcentaje de variabilidad explicada por el modelo es del 84,17%, por lo que el modelo se puede considerar bueno para predecir.
 
 #A continuación se presentan dos medidas de importancia de las variables. 
 #La primera se basa en la disminución media de la precisión de las predicciones en la muestra de test
@@ -187,19 +209,20 @@ library(gbm)
 #El argumento n.trees = 5000 indica que queremos 5000 árboles, y la opción
 #opción interaction.depth = 4 limita la profundidad de cada árbol.
 boost.incomedata_procesado=gbm(income~.,data=incomedata_procesado[train,],distribution="gaussian",n.trees=5000,interaction.depth=4)
+boost.incomedata_procesado
 summary(boost.incomedata_procesado)
 #Vemos que prov y ac son las variables más importantes del Boosting. También lo son las variables educ3 y labor, como en los anteriores modelos.
 
 #Veamos ahora las predicciones del modelo, y el error cuadrático medio de test:
 yhat.boost=predict(boost.incomedata_procesado,newdata=incomedata_procesado[-train,],n.trees=5000)
-mean((yhat.boost-incomedata_procesado[-train,]$income)^2) #El ECM obtenido (49942325) es mejor que los demás modelos derivados, pero peor que el del primer árbol de regresión.
+mean((yhat.boost-incomedata_procesado[-train,]$income)^2) #El ECM obtenido (44987846) es mejor que los demás modelos derivados, pero peor que el del primer árbol de regresión.
 
 #Veamos cuál es el porcentaje de variabilidad explicada por el modelo:
 SCT <- var(incomedata_procesado$income) #Suma de Cuadrado Total(SCT)
 SCE.boost <- mean((yhat.boost - mean(yhat.boost))^2) #SCE
 SCR.boost <- SCT-SCE.boost #Suma de cuadrados debido al modelo
 R.boost <- SCR.boost/SCT
-R.boost #El porcentaje de variabilidad explicada por el modelo es del 78'07%, por lo que el modelo se puede considerar bueno para predecir.
+R.boost #El porcentaje de variabilidad explicada por el modelo es del 77'5%, por lo que el modelo se puede considerar bueno para predecir.
 
 #Ahora realizaremos el boosting con un valor del parámetro de contracción λ distinto,para ver si el ECM mejora.
 #El valor por defecto es 0,001 pero tomaremos λ = 0.15.
