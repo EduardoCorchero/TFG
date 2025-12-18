@@ -187,7 +187,12 @@ def main():
             for nombre, query in queries.items()
         ])
     else:
-        metodo = getattr(validador, f'generar_query_{args.tipo}')
+        # Mapear nombres de argumentos a métodos
+        method_name = f'generar_query_{args.tipo}'
+        if not hasattr(validador, method_name):
+            print(f"Error: Tipo de query '{args.tipo}' no reconocido", file=sys.stderr)
+            sys.exit(1)
+        metodo = getattr(validador, method_name)
         output = metodo()
     
     # Mostrar o guardar resultado
