@@ -21,9 +21,9 @@ WHERE a.clasificacion IN (
 AND b.contra1 IS NULL;
 
 -- ================================================================
--- Query extendido: Verificar refasociacion en ambas vistas
+-- Query extendido: Verificar refasociaciones en ambas vistas
 -- ================================================================
--- Este query muestra los refasociacion de intermedia_BDR que también
+-- Este query muestra las refasociaciones de intermedia_BDR que también
 -- existen en intermedia_CREAM
 
 SELECT DISTINCT 
@@ -42,12 +42,12 @@ WHERE a.clasificacion IN (
     '01. El contrato no está ni en Solvencia ni en traza de SIMA',
     '03. El contrato está y cruza en Solvencia pero no está en traza de SIMA'
 )
-AND b.contra1 IS NULL;
+AND b.refasociacion IS NOT NULL;
 
 -- ================================================================
 -- Query alternativo: Solo refasociaciones que existen en ambas vistas
 -- ================================================================
--- Filtra solo los refasociacion que están presentes tanto en 
+-- Filtra solo las refasociaciones que están presentes tanto en 
 -- intermedia_BDR como en intermedia_CREAM
 
 SELECT DISTINCT 
@@ -63,7 +63,7 @@ WHERE a.clasificacion IN (
     '01. El contrato no está ni en Solvencia ni en traza de SIMA',
     '03. El contrato está y cruza en Solvencia pero no está en traza de SIMA'
 )
-AND b.contra1 IS NULL;
+AND b.refasociacion IS NOT NULL;
 
 -- ================================================================
 -- Query de análisis: Contar refasociaciones por estado
@@ -82,4 +82,4 @@ WHERE a.clasificacion IN (
     '01. El contrato no está ni en Solvencia ni en traza de SIMA',
     '03. El contrato está y cruza en Solvencia pero no está en traza de SIMA'
 )
-AND b.contra1 IS NULL;
+AND b.refasociacion IS NOT NULL;

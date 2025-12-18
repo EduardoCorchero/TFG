@@ -22,7 +22,7 @@ WHERE a.clasificacion IN (
     '01. El contrato no está ni en Solvencia ni en traza de SIMA',
     '03. El contrato está y cruza en Solvencia pero no está en traza de SIMA'
 )
-AND b.contra1 IS NULL;
+AND b.refasociacion IS NOT NULL;
 ```
 
 > **Nota:** Reemplazar `PROD` con tu entorno (`TEST`, `DEV`, etc.)

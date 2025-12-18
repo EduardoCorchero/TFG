@@ -51,7 +51,7 @@ WHERE a.clasificacion IN (
     '01. El contrato no está ni en Solvencia ni en traza de SIMA',
     '03. El contrato está y cruza en Solvencia pero no está en traza de SIMA'
 )
-AND b.contra1 IS NULL;
+AND b.refasociacion IS NOT NULL;
 ```
 
 ## 3. Verificación de Resultados
@@ -71,7 +71,7 @@ WHERE a.clasificacion IN (
     '01. El contrato no está ni en Solvencia ni en traza de SIMA',
     '03. El contrato está y cruza en Solvencia pero no está en traza de SIMA'
 )
-AND b.contra1 IS NULL;
+AND b.refasociacion IS NOT NULL;
 ```
 
 ### Paso 2: Revisar detalle
@@ -92,7 +92,7 @@ WHERE a.clasificacion IN (
     '01. El contrato no está ni en Solvencia ni en traza de SIMA',
     '03. El contrato está y cruza en Solvencia pero no está en traza de SIMA'
 )
-AND b.contra1 IS NULL;
+AND b.refasociacion IS NOT NULL;
 ```
 
 ## 4. Casos de Uso Comunes
@@ -111,7 +111,7 @@ WHERE a.clasificacion IN (
     '01. El contrato no está ni en Solvencia ni en traza de SIMA',
     '03. El contrato está y cruza en Solvencia pero no está en traza de SIMA'
 )
-AND b.contra1 IS NULL
+AND b.refasociacion IS NOT NULL
 AND c.refasociacion IS NULL;
 ```
 
@@ -133,7 +133,7 @@ WHERE a.clasificacion IN (
     '01. El contrato no está ni en Solvencia ni en traza de SIMA',
     '03. El contrato está y cruza en Solvencia pero no está en traza de SIMA'
 )
-AND b.contra1 IS NULL;
+AND b.refasociacion IS NOT NULL;
 ```
 
 ## 5. Notas Importantes

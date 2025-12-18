@@ -79,7 +79,7 @@ class ValidadorTabla:
             '{self.clasificaciones[0]}',
             '{self.clasificaciones[1]}'
         )
-        AND b.contra1 IS NULL;
+        AND b.refasociacion IS NOT NULL;
         """
         return query.strip()
     
@@ -104,7 +104,7 @@ class ValidadorTabla:
             '{self.clasificaciones[0]}',
             '{self.clasificaciones[1]}'
         )
-        AND b.contra1 IS NULL;
+        AND b.refasociacion IS NOT NULL;
         """
         return query.strip()
     
@@ -129,7 +129,7 @@ class ValidadorTabla:
             '{self.clasificaciones[0]}',
             '{self.clasificaciones[1]}'
         )
-        AND b.contra1 IS NULL;
+        AND b.refasociacion IS NOT NULL;
         """
         return query.strip()
     
